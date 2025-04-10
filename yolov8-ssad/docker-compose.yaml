@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  yolo-ssad:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        BUILDKIT_INLINE_CACHE: 1
+    image: yolo-ssad-cuda-12.4
+    container_name: yolo-ssad-detection
+    volumes:
+      - ./:/workspace
+      - ${HOME}/data:/data  # Optional: Mount a data directory from host
+      - pip-cache:/root/.cache/pip
+    working_dir: /workspace
+    command: >
+      python3 train_ssad.py
+      --num-gpus 1
+    environment:
+      - PYTHONPATH=/workspace
+      - CUDA_VISIBLE_DEVICES=0
+    tty: true
+    stdin_open: true
+    shm_size: 8gb
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [gpu]
+
+# Define named volumes
+volumes:
+  pip-cache:
+    driver: local 
