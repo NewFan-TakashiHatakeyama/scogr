@@ -76,6 +76,11 @@ COCOフォーマットからYOLOフォーマットへの変換は `convert_yolo.
 ```bash
 python convert_yolo.py --coco_json_path path/to/coco/annotations.json --yolo_save_dir path/to/yolo/labels
 ```
+## 重みファイルの取得
+google Dribeの歯式関連フォルダにモデルのweightsを格納しています。best.ptが対象となります。
+https://drive.google.com/drive/u/1/folders/1iAdQgfKTGZqer-8DQJZ-0LB-xz5Cdlkd
+
+プロジェクト直下にweightsフォルダを作成し、モデルの重みを追加してください。
 
 ## モデルのトレーニング
 
