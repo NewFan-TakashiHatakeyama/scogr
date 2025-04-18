@@ -1,5 +1,5 @@
 # Dentex Enumeration32 dataset config
-path: dentex_dataset/yolo/enumeration32/
+path: merged_dentex_kaggle/yolo/enumeration32/
 train: images/train
 val: images/val
 

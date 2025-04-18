@@ -360,7 +360,7 @@ if __name__ == '__main__':
                         help='ハイパーパラメータ設定ファイル')
     parser.add_argument('--data', type=str, default='dentex_enum32.yaml',
                         help='データセット定義ファイル')
-    parser.add_argument('--weights', type=str, default='yolov8l.pt',
+    parser.add_argument('--weights', type=str, default='weights/best.pt',
                         help='事前学習済みの重みファイル')
     parser.add_argument('--model', type=str, default='yolov8l.yaml',
                         help='モデル定義ファイル')
@@ -372,18 +372,14 @@ if __name__ == '__main__':
                         help='入力画像サイズ')
     parser.add_argument('--device', type=str, default='0',
                         help='使用するデバイス（例：0, 0,1,2,3, cpu）')
-    parser.add_argument('--name', type=str, default='v8l-ssad',
+    parser.add_argument('--name', type=str, default='v8l-ssad-add-kaggle_dataset',
                         help='実験名')
-    parser.add_argument('--ssad_flag', action='store_true',
-                        help='SSADを有効にする')
     parser.add_argument('--ssad_mask_patch_size', type=int, default=32,
                         help='SSADマスクパッチサイズ')
     parser.add_argument('--ssad_model_patch_size', type=int, default=2,
                         help='SSADモデルパッチサイズ')
     parser.add_argument('--ssad_mask_ratio', type=float, default=0.6,
                         help='SSADマスク比率')
-    parser.add_argument('--ssad_heavily', action='store_true',
-                        help='重SSADを使用する')
     parser.add_argument('--ssad_loss_scale', type=float, default=0.1,
                         help='SSAD損失スケール')
     
@@ -403,11 +399,11 @@ if __name__ == '__main__':
         exist_ok=True,
         name=args.name,
         task="ssad",
-        ssad_flag=args.ssad_flag,
+        ssad_flag=True,
         ssad_mask_patch_size=args.ssad_mask_patch_size,
         ssad_model_patch_size=args.ssad_model_patch_size,
         ssad_mask_ratio=args.ssad_mask_ratio,
-        ssad_heavily=args.ssad_heavily,
+        ssad_heavily=True,
         ssad_loss_scale=args.ssad_loss_scale,
         trainer=SSADTrainer
     )
