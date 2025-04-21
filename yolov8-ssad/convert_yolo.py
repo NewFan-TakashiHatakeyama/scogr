@@ -49,10 +49,10 @@ def convert_coco_to_yolo(coco_json_path, yolo_txt_save_dir):
 def main():
     parser = argparse.ArgumentParser(description='COCOフォーマットのアノテーションファイルをYOLOフォーマットに変換します')
     parser.add_argument('--coco_json_path', type=str, 
-                        default='dentex_dataset/coco/enumeration32/annotations/instances_train2017.json',
+                        default='dentex_dataset/coco/enumeration32/annotations/instances_val2017.json',
                         help='入力COCOフォーマットJSONファイルのパス')
     parser.add_argument('--yolo_save_dir', type=str, 
-                        default='dentex_dataset/yolo/enumeration32/labels/train',
+                        default='dentex_dataset/yolo/enumeration32/labels/val',
                         help='出力YOLOフォーマットラベルを保存するディレクトリ')
     
     args = parser.parse_args()
