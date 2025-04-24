@@ -372,7 +372,7 @@ if __name__ == '__main__':
                         help='入力画像サイズ')
     parser.add_argument('--device', type=str, default='0',
                         help='使用するデバイス（例：0, 0,1,2,3, cpu）')
-    parser.add_argument('--name', type=str, default='v8l-ssad-add-kaggle_dataset',
+    parser.add_argument('--name', type=str, default='v8l-ssad-merged-datasetV3',
                         help='実験名')
     parser.add_argument('--ssad_mask_patch_size', type=int, default=32,
                         help='SSADマスクパッチサイズ')
