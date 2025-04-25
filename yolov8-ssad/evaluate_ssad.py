@@ -43,8 +43,8 @@ def main():
     parser = argparse.ArgumentParser(description='SSADモデル歯検出評価スクリプト')
     parser.add_argument('--weights', type=str, default='./weights/best.pt', 
                         help='モデルの重みファイルのパス')
-    parser.add_argument('--image_dir', type=str, default='.//Panoramic Dental X-Ray Images/images/val/',  help='画像ディレクトリ')
-    parser.add_argument('--label_dir', type=str, default='.//Panoramic Dental X-Ray Images/labels/val/',  help='ラベルディレクトリ')
+    parser.add_argument('--image_dir', type=str, default='./Test Dataset/images/',  help='画像ディレクトリ')
+    parser.add_argument('--label_dir', type=str, default='./Test Dataset/labels/',  help='ラベルディレクトリ')
     parser.add_argument('--output', type=str, default='./results/evaluation_results.json', help='出力JSONファイル')
     parser.add_argument('--conf', type=float, default=0.5, help='信頼度閾値')
     args = parser.parse_args()
@@ -109,6 +109,26 @@ def main():
     df_all = pd.DataFrame(all_records)
     df_all.to_csv(csv_dir / 'all_score.csv', index=False, encoding='utf-8')
     print(f"Saved per-image CSVs and all_score.csv to {csv_dir}")
+
+    # --- 歯番号ごとの精度算出 ---
+    # JSON結果を読み込み
+    with open(args.output, 'r', encoding='utf-8') as jf:
+        data = json.load(jf)
+    results = data['results']
+    # 歯番号ごとの正解数と総数を集計
+    tooth_stats = {num: {'correct': 0, 'total': 0} for num in FDI_STRS}
+    for item in results:
+        gt = item['gt']
+        pred = item['pred']
+        for num in FDI_STRS:
+            if gt[num] == pred[num]:
+                tooth_stats[num]['correct'] += 1
+            tooth_stats[num]['total'] += 1
+    # 精度を計算してCSVに保存
+    acc_list = [{'FDI': num, 'accuracy': tooth_stats[num]['correct'] / tooth_stats[num]['total']} for num in FDI_STRS]
+    df_tooth = pd.DataFrame(acc_list)
+    df_tooth.to_csv(csv_dir / 'per_tooth_accuracy.csv', index=False, encoding='utf-8')
+    print(f"Saved per-tooth accuracy to {csv_dir / 'per_tooth_accuracy.csv'}")
 
 if __name__ == '__main__':
     main() 
