@@ -1,0 +1,19 @@
+# Train/val/test sets as 1) dir: path/to/imgs, 2) file: path/to/imgs.txt, or 3) list: [path/to/imgs1, path/to/imgs2, ..]
+path: ./datasetsV2/imagenet_style/restoration # dataset root dir
+train: train # train images (relative to 'path') 1281167 images
+val: val # val images (relative to 'path') 50000 images
+test: # test images (optional)
+
+
+# Classes
+names:
+  0: '正常'
+  1: 'secondaryCaries'
+  2: 'インレー'
+  3: 'インレー_secondaryCaries'
+  4: 'クラウン'
+  5: 'クラウン_secondaryCaries'
+  6: 'その他'
+  7: 'その他_secondaryCaries'
+  8: '処置歯'
+  9: '処置歯_secondaryCaries'

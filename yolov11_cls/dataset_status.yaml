@@ -1,0 +1,17 @@
+# Train/val/test sets as 1) dir: path/to/imgs, 2) file: path/to/imgs.txt, or 3) list: [path/to/imgs1, path/to/imgs2, ..]
+path: ./datasetsV2/imagenet_style/status # dataset root dir
+train: train # train images (relative to 'path') 1281167 images
+val: val # val images (relative to 'path') 50000 images
+test: # test images (optional)
+
+
+# Classes
+names:
+  0: '未萌歯_永久歯'
+  1: '残存歯'
+  2: '残存歯_永久歯'
+  3: '残存歯_乳歯'
+  4: '先欠歯_永久歯'
+  5: '埋伏歯'
+  6: '埋伏歯_永久歯'
+  7: '未萌歯'

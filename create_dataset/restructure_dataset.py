@@ -682,7 +682,7 @@ def restructure_to_imagenet_style(dataset_dir: str, output_dir: str) -> None:
         dataset_paths = {
             "images": dataset_dir / "images",
             "labels": dataset_dir / "labels",
-            "annotation": dataset_dir / "annotation"
+            "annotation": dataset_dir / "annotation_val"
         }
         
         # 出力ディレクトリの初期化
@@ -699,8 +699,8 @@ def restructure_to_imagenet_style(dataset_dir: str, output_dir: str) -> None:
 if __name__ == "__main__":
     try:
         # ★ 環境に合わせて書き換えてください ★
-        dataset_directory = "./dataset/Teeth Segmentation on dental X-ray images"
-        output_directory  = "./dataset/imagenet_style"
+        dataset_directory = "./dataset/Panoramic Dental X-Ray Images"
+        output_directory  = "./dataset/imagenet_style_val"
         rename_image_files(dataset_directory)
         rename_label_files(dataset_directory)
         restructure_to_imagenet_style(dataset_directory, output_directory)
