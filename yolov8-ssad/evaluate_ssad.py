@@ -10,6 +10,8 @@ import pandas as pd
 from pathlib import Path
 import torch
 from ultralytics import YOLO
+import cv2  # for manual annotation of predicted bboxes
+import numpy as np  # for bbox array handling
 
 # FDI 歯番号 (標準的な FDI 表記)
 FDI_NUMS = list(range(11,19)) + list(range(21,29)) + list(range(31,39)) + list(range(41,49))
@@ -49,6 +51,12 @@ def main():
     parser.add_argument('--conf', type=float, default=0.5, help='信頼度閾値')
     args = parser.parse_args()
 
+    # 出力ディレクトリ設定 (JSON, CSV, 画像)
+    csv_dir = Path(args.output).parent
+    os.makedirs(csv_dir, exist_ok=True)
+    pred_img_dir = csv_dir / 'pred_img'
+    os.makedirs(pred_img_dir, exist_ok=True)
+
     # モデルロード
     model = YOLO(args.weights)
     model.task = 'ssad'
@@ -63,8 +71,25 @@ def main():
         if not os.path.exists(label_path):
             print(f"Warning: ラベルファイルが見つかりません: {label_path}")
             continue
+        # 推論と結果取得
+        results_yolo = model(str(img_path), conf=args.conf, task='ssad')
+        res = results_yolo[0]
+        cls_ids = res.boxes.cls.cpu().numpy().astype(int).tolist()
+        xyxy = res.boxes.xyxy.cpu().numpy()
+        pred_set = set(CLASS_TO_FDI[i] for i in cls_ids if i in CLASS_TO_FDI)
+        # GTラベル読み込み
         gt_set = load_gt_labels(label_path)
-        pred_set = predict_tooth_nums(model, img_path, args.conf)
+        # 手動でアノテーション描画
+        img = cv2.imread(str(img_path))
+        for bbox, cid in zip(xyxy, cls_ids):
+            x1, y1, x2, y2 = bbox.astype(int)
+            label = CLASS_TO_FDI.get(cid, str(cid))
+            cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
+            cv2.putText(img, label, (x1, y1 - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
+        out_img_path = pred_img_dir / Path(img_path).name
+        cv2.imwrite(str(out_img_path), img)
+        print(f"Saved annotated image: {out_img_path}")
+        # 正誤マップ
         gt_map = {num: (1 if num in gt_set else 0) for num in FDI_STRS}
         pred_map = {num: (1 if num in pred_set else 0) for num in FDI_STRS}
         correct = sum(gt_map[num] == pred_map[num] for num in FDI_STRS)
@@ -87,9 +112,6 @@ def main():
     with open(args.output, 'w', encoding='utf-8') as f:
         json.dump(out_dict, f, ensure_ascii=False, indent=2)
     # --- CSV出力処理開始 ---
-    # CSV保存先ディレクトリ：JSONファイルと同じ場所
-    csv_dir = Path(args.output).parent
-    os.makedirs(csv_dir, exist_ok=True)
     all_records = []
     for item in results:
         image_name = item['image']
@@ -129,6 +151,16 @@ def main():
     df_tooth = pd.DataFrame(acc_list)
     df_tooth.to_csv(csv_dir / 'per_tooth_accuracy.csv', index=False, encoding='utf-8')
     print(f"Saved per-tooth accuracy to {csv_dir / 'per_tooth_accuracy.csv'}")
+    # --- ファイルごとの歯式正誤まとめ ---
+    records = []
+    for item in results:
+        row = {'image': item['image']}
+        for num in FDI_STRS:
+            row[num] = 1 if item['gt'][num] == item['pred'][num] else 0
+        records.append(row)
+    df_file = pd.DataFrame(records)
+    df_file.to_csv(csv_dir / 'per_image_tooth_correctness.csv', index=False, encoding='utf-8')
+    print(f"Saved per-image tooth correctness to {csv_dir / 'per_image_tooth_correctness.csv'}")
 
 if __name__ == '__main__':
     main() 
