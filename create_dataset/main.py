@@ -26,12 +26,12 @@ def parse_args():
     )
     
     # Required arguments
-    parser.add_argument('--type', default='restoration',
+    parser.add_argument('--type', default='pathology',
                        help='Type of dataset to process condition restoration pathology')
     
     # Optional arguments
     parser.add_argument('--base-dir', 
-                       default='dataset/Teeth Segmentation on dental X-ray images',
+                       default='dataset/Panoramic Dental X-Ray Images',
                        help='Base directory containing the dataset')
     parser.add_argument('--val-ratio', type=float, default=0.2,
                        help='Ratio of data to use for validation')

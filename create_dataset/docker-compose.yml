@@ -1,0 +1,12 @@
+version: '3'
+
+services:
+  dataset-creator:
+    build: .
+    volumes:
+      - ./dataset:/app/dataset
+    # デフォルトではヘルプを表示
+    command: --help
+    # Windows環境でのパス問題を回避
+    environment:
+      - PYTHONUNBUFFERED=1 

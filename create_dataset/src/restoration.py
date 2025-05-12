@@ -11,6 +11,14 @@ RESTORATION_CLASSES = {
     "Other": 3
 }
 
+# Japanese to English mapping
+JP_TO_EN_RESTORATION = {
+    "インレー": "Inlay",
+    "クラウン": "Crown",
+    "処置歯": "Treated tooth"
+    # Other types will be mapped to "Other"
+}
+
 def create_restoration_annotations(base_dir="dataset/Teeth Segmentation on dental X-ray images", output_dir=None):
     """
     Create YOLO format annotations for dental restorations from JSON annotations.
@@ -105,16 +113,19 @@ def create_restoration_annotations(base_dir="dataset/Teeth Segmentation on denta
                 has_restoration = False
                 
                 # Check for restoration type
-                restoration_type = restoration.get("type")
-                if restoration_type in RESTORATION_CLASSES:
-                    out_f.write(f"{RESTORATION_CLASSES[restoration_type]} {bbox[0]} {bbox[1]} {bbox[2]} {bbox[3]}\n")
-                    stats_by_class[restoration_type] += 1
+                jp_restoration_type = restoration.get("type")
+                
+                if jp_restoration_type in JP_TO_EN_RESTORATION:
+                    # Map known Japanese terms to English
+                    en_restoration_type = JP_TO_EN_RESTORATION[jp_restoration_type]
+                    out_f.write(f"{RESTORATION_CLASSES[en_restoration_type]} {bbox[0]} {bbox[1]} {bbox[2]} {bbox[3]}\n")
+                    stats_by_class[en_restoration_type] += 1
                     teeth_with_restoration[tooth_id] += 1
-                    images_with_restoration[restoration_type].add(image_num)
+                    images_with_restoration[en_restoration_type].add(image_num)
                     total_annotations += 1
                     has_restoration = True
-                    image_restorations.append(f"Tooth {tooth_id}: {restoration_type}")
-                elif restoration_type is not None and restoration_type != "null":
+                    image_restorations.append(f"Tooth {tooth_id}: {en_restoration_type} ({jp_restoration_type})")
+                elif jp_restoration_type is not None and jp_restoration_type != "null":
                     # Other type of restoration
                     out_f.write(f"{RESTORATION_CLASSES['Other']} {bbox[0]} {bbox[1]} {bbox[2]} {bbox[3]}\n")
                     stats_by_class['Other'] += 1
@@ -122,7 +133,7 @@ def create_restoration_annotations(base_dir="dataset/Teeth Segmentation on denta
                     images_with_restoration['Other'].add(image_num)
                     total_annotations += 1
                     has_restoration = True
-                    image_restorations.append(f"Tooth {tooth_id}: Other ({restoration_type})")
+                    image_restorations.append(f"Tooth {tooth_id}: Other ({jp_restoration_type})")
         
         # Print details for this image
         if image_restorations:
@@ -133,7 +144,7 @@ def create_restoration_annotations(base_dir="dataset/Teeth Segmentation on denta
             print(f"Image {image_num} - No restorations found")
     
     # Create a README with details about the dataset
-    create_restoration_readme(output_dir, RESTORATION_CLASSES, total_annotations, 
+    create_restoration_readme(output_dir, RESTORATION_CLASSES, JP_TO_EN_RESTORATION, total_annotations, 
                            stats_by_class, teeth_with_restoration, images_with_restoration)
     
     print(f"\nSummary:")
@@ -152,7 +163,7 @@ def create_restoration_annotations(base_dir="dataset/Teeth Segmentation on denta
         "output_dir": output_dir
     }
 
-def create_restoration_readme(output_dir, restoration_classes, total_annotations, 
+def create_restoration_readme(output_dir, restoration_classes, jp_to_en_mapping, total_annotations, 
                            stats_by_class, teeth_with_restoration, images_with_restoration):
     """
     Create a README file with dataset statistics for dental restoration annotations.
@@ -160,6 +171,7 @@ def create_restoration_readme(output_dir, restoration_classes, total_annotations
     Args:
         output_dir (str): Directory to write the README to
         restoration_classes (dict): Mapping of restoration types to class IDs
+        jp_to_en_mapping (dict): Mapping of Japanese restoration names to English
         total_annotations (int): Total number of annotations created
         stats_by_class (Counter): Count of annotations by class
         teeth_with_restoration (dict): Count of restorations by tooth ID
@@ -173,10 +185,11 @@ def create_restoration_readme(output_dir, restoration_classes, total_annotations
         
         readme_file.write("## Classes\n")
         readme_file.write("The following classes are used for restoration annotation:\n\n")
-        readme_file.write("| Class ID | Restoration Type |\n")
-        readme_file.write("|----------|---------------|\n")
+        readme_file.write("| Class ID | Restoration Type | Japanese |\n")
+        readme_file.write("|----------|-----------------|----------|\n")
         for restoration, class_id in restoration_classes.items():
-            readme_file.write(f"| {class_id} | {restoration} |\n")
+            jp_restoration = next((jp for jp, en in jp_to_en_mapping.items() if en == restoration), "-")
+            readme_file.write(f"| {class_id} | {restoration} | {jp_restoration} |\n")
         
         readme_file.write("\n## Dataset Statistics\n\n")
         readme_file.write(f"- Total annotations: {total_annotations}\n")
